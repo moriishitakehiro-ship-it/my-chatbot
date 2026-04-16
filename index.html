@@ -3,183 +3,378 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>自律をうながすチャットボット</title>
+  <title>研修レビュー報告書ジェネレーター</title>
   <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --primary: #1e3a8a;
+      --primary-soft: #dbeafe;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #d1d5db;
+      --ok: #047857;
+      --warn: #b45309;
+    }
+
     body {
-      font-family: sans-serif;
-      max-width: 700px;
+      margin: 0;
+      font-family: "Segoe UI", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .container {
+      max-width: 960px;
       margin: 40px auto;
-      padding: 0 16px;
-      background-color: #f7f7f7;
+      padding: 0 16px 32px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.04);
+      margin-bottom: 16px;
     }
 
     h1 {
-      text-align: center;
-      margin-bottom: 20px;
+      margin: 0 0 8px;
+      font-size: 28px;
+      color: var(--primary);
     }
 
-    #chat {
-      border: 1px solid #ccc;
-      border-radius: 12px;
-      padding: 16px;
-      height: 450px;
-      overflow-y: auto;
-      margin-bottom: 12px;
-      background-color: #ffffff;
+    p.lead {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
     }
 
-    .msg {
-      display: flex;
-      margin: 10px 0;
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px;
+      margin-top: 14px;
     }
 
-    .msg.user {
-      justify-content: flex-end;
+    label {
+      font-size: 13px;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 6px;
     }
 
-    .msg.bot {
-      justify-content: flex-start;
-    }
-
-    .bubble {
-      max-width: 75%;
-      padding: 12px 16px;
-      border-radius: 18px;
-      line-height: 1.5;
-      word-break: break-word;
-    }
-
-    .user .bubble {
-      background-color: #d9f2ff;
-      color: #000;
-      border-bottom-right-radius: 6px;
-    }
-
-    .bot .bubble {
-      background-color: #eeeeee;
-      color: #333;
-      border-bottom-left-radius: 6px;
-    }
-
-    .thinking {
-      margin: 10px 0;
-      color: #666;
+    input[type="file"],
+    select,
+    button,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
       font-size: 14px;
-      text-align: left;
-      padding-left: 4px;
-    }
-
-    #row {
-      display: flex;
-      gap: 8px;
-    }
-
-    input {
-      flex: 1;
-      padding: 12px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 16px;
+      box-sizing: border-box;
+      background: #fff;
     }
 
     button {
-      padding: 12px 16px;
+      background: var(--primary);
+      color: #fff;
       border: none;
-      border-radius: 8px;
-      background-color: #333;
-      color: white;
-      font-size: 16px;
       cursor: pointer;
+      font-weight: 600;
     }
 
     button:hover {
-      opacity: 0.9;
+      opacity: 0.92;
+    }
+
+    button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 8px;
+      line-height: 1.5;
+    }
+
+    .status {
+      margin-top: 10px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .status.ok { color: var(--ok); }
+    .status.warn { color: var(--warn); }
+
+    .report {
+      white-space: pre-wrap;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 16px;
+      line-height: 1.7;
+      min-height: 220px;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .toolbar button {
+      width: auto;
+      padding: 10px 14px;
+      background: #111827;
     }
   </style>
 </head>
 <body>
-  <h1>自律をうながすチャットボット</h1>
+  <div class="container">
+    <div class="card">
+      <h1>研修レビュー報告書ジェネレーター</h1>
+      <p class="lead">
+        Excelファイル（.xlsx / .xls）を読み込み、受講者コメントを分析して、報告書形式で要約します。
+      </p>
+    </div>
 
-  <div id="chat"></div>
+    <div class="card">
+      <div class="grid">
+        <div>
+          <label for="fileInput">1) レビューExcelを選択</label>
+          <input id="fileInput" type="file" accept=".xlsx,.xls" />
+        </div>
 
-  <div id="row">
-    <input id="input" type="text" placeholder="何か聞いてください" />
-    <button id="send">送信</button>
+        <div>
+          <label for="commentColumn">2) コメント列</label>
+          <select id="commentColumn" disabled></select>
+        </div>
+
+        <div>
+          <label for="scoreColumn">3) 満足度列（任意）</label>
+          <select id="scoreColumn" disabled></select>
+        </div>
+
+        <div>
+          <label>&nbsp;</label>
+          <button id="generateBtn" disabled>報告書を作成</button>
+        </div>
+      </div>
+      <p class="hint">
+        想定フォーマット：1行目がヘッダー。コメント列には自由記述を、満足度列には1〜5の数値を含めてください。
+      </p>
+      <div id="status" class="status"></div>
+    </div>
+
+    <div class="card">
+      <label for="reportOutput">生成された報告書</label>
+      <div id="reportOutput" class="report">ここに報告書が表示されます。</div>
+      <div class="toolbar">
+        <button id="copyBtn" disabled>コピー</button>
+      </div>
+    </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script>
-    const chat = document.getElementById("chat");
-    const input = document.getElementById("input");
-    const send = document.getElementById("send");
+    const fileInput = document.getElementById("fileInput");
+    const commentColumn = document.getElementById("commentColumn");
+    const scoreColumn = document.getElementById("scoreColumn");
+    const generateBtn = document.getElementById("generateBtn");
+    const copyBtn = document.getElementById("copyBtn");
+    const reportOutput = document.getElementById("reportOutput");
+    const statusEl = document.getElementById("status");
 
-    function addBubbleMessage(text, className) {
-      const wrapper = document.createElement("div");
-      wrapper.className = `msg ${className}`;
+    let rows = [];
+    let headers = [];
 
-      const bubble = document.createElement("div");
-      bubble.className = "bubble";
-      bubble.textContent = text;
+    const stopWords = new Set([
+      "です", "ます", "した", "する", "ある", "いる", "こと", "ため", "よう", "今回", "研修", "講義",
+      "内容", "受講", "思う", "感じる", "非常", "とても", "さらに", "など", "もの", "これ", "それ", "さん"
+    ]);
 
-      wrapper.appendChild(bubble);
-      chat.appendChild(wrapper);
-      chat.scrollTop = chat.scrollHeight;
+    const positiveHints = ["良", "わかりやす", "満足", "役立", "実践", "丁寧", "有意義", "学び"];
+    const improvementHints = ["難", "長", "短", "改善", "不足", "多すぎ", "少な", "欲しい", "不明", "曖昧"];
 
-      return bubble;
+    function setStatus(text, type = "ok") {
+      statusEl.textContent = text;
+      statusEl.className = `status ${type}`;
     }
 
-    function addThinkingMessage(text) {
-      const div = document.createElement("div");
-      div.className = "thinking";
-      div.textContent = text;
+    function fillSelectOptions(select, items, includeEmpty = false) {
+      select.innerHTML = "";
+      if (includeEmpty) {
+        const opt = document.createElement("option");
+        opt.value = "";
+        opt.textContent = "選択なし";
+        select.appendChild(opt);
+      }
 
-      chat.appendChild(div);
-      chat.scrollTop = chat.scrollHeight;
-
-      return div;
+      items.forEach((item) => {
+        const opt = document.createElement("option");
+        opt.value = item;
+        opt.textContent = item;
+        select.appendChild(opt);
+      });
+      select.disabled = false;
     }
 
-    async function handleSend() {
-      const text = input.value.trim();
-      if (!text) return;
-
-      // ユーザーの質問は吹き出しで表示
-      addBubbleMessage(text, "user");
-      input.value = "";
-
-      // 考え中メッセージは吹き出しなし
-      const thinking = addThinkingMessage("考え中…");
-
-      const messages = [
-        "考え中…",
-        "あなたの為を思って考え中…",
-        "君にとってのベストを探して考え中…"
-      ];
-
-      let index = 0;
-      const interval = setInterval(() => {
-        index = (index + 1) % messages.length;
-        thinking.textContent = messages[index];
-      }, 1500);
-
-      // 5〜8秒待つ
-      const delay = 5000 + Math.floor(Math.random() * 3000);
-      await new Promise(resolve => setTimeout(resolve, delay));
-
-      // 切り替え停止
-      clearInterval(interval);
-
-      // 考え中表示を消す
-      thinking.remove();
-
-      // 最終回答だけ吹き出しで表示
-      addBubbleMessage("自分で考えて！", "bot");
+    function autoSelectColumns() {
+      const commentCandidate = headers.find((h) => /コメント|感想|レビュー|自由|所感/i.test(h));
+      const scoreCandidate = headers.find((h) => /満足|評価|点数|スコア|5段階/i.test(h));
+      if (commentCandidate) commentColumn.value = commentCandidate;
+      if (scoreCandidate) scoreColumn.value = scoreCandidate;
     }
 
-    send.addEventListener("click", handleSend);
+    function tokenize(text) {
+      return (text.match(/[一-龠ぁ-んァ-ヶーA-Za-z0-9]{2,}/g) || [])
+        .map((t) => t.toLowerCase())
+        .filter((t) => !stopWords.has(t));
+    }
 
-    input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        handleSend();
+    function topKeywords(comments, limit = 8) {
+      const freq = new Map();
+      comments.forEach((comment) => {
+        tokenize(comment).forEach((token) => {
+          freq.set(token, (freq.get(token) || 0) + 1);
+        });
+      });
+
+      return [...freq.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, limit)
+        .map(([word, count]) => `${word}（${count}件）`);
+    }
+
+    function splitBySentiment(comments) {
+      const positives = [];
+      const improvements = [];
+
+      comments.forEach((comment) => {
+        const normalized = comment.replace(/\s+/g, "");
+        if (positiveHints.some((k) => normalized.includes(k))) positives.push(comment);
+        if (improvementHints.some((k) => normalized.includes(k))) improvements.push(comment);
+      });
+
+      return { positives, improvements };
+    }
+
+    function sampleLines(lines, limit = 3) {
+      return lines.slice(0, limit).map((l, idx) => `  ${idx + 1}. ${l}`);
+    }
+
+    function numericAverage(values) {
+      const nums = values
+        .map((v) => Number(v))
+        .filter((v) => !Number.isNaN(v));
+      if (!nums.length) return null;
+      return nums.reduce((a, b) => a + b, 0) / nums.length;
+    }
+
+    function buildReport(comments, scores) {
+      const total = comments.length;
+      const avgScore = numericAverage(scores);
+      const keywords = topKeywords(comments);
+      const { positives, improvements } = splitBySentiment(comments);
+
+      const scoreText = avgScore === null
+        ? "満足度データなし"
+        : `平均満足度: ${avgScore.toFixed(2)} / 5.00`;
+
+      const summary = [];
+      summary.push("【研修レビュー報告書】");
+      summary.push("");
+      summary.push("1. サマリー");
+      summary.push(`- 収集レビュー件数: ${total}件`);
+      summary.push(`- ${scoreText}`);
+      summary.push(`- 主要キーワード: ${keywords.join("、") || "抽出なし"}`);
+      summary.push("");
+      summary.push("2. 受講者のポジティブ意見");
+      summary.push(`- 該当件数（推定）: ${positives.length}件`);
+      summary.push(...(positives.length ? sampleLines(positives) : ["  - 該当コメントなし"]));
+      summary.push("");
+      summary.push("3. 改善要望・課題");
+      summary.push(`- 該当件数（推定）: ${improvements.length}件`);
+      summary.push(...(improvements.length ? sampleLines(improvements) : ["  - 該当コメントなし"]));
+      summary.push("");
+      summary.push("4. 次回施策（提案）");
+      summary.push("- 要望が多いテーマを冒頭で再整理し、到達目標を明示する。");
+      summary.push("- 実務に近い演習時間を増やし、質疑応答の枠を確保する。");
+      summary.push("- 難易度差に対応するため、事前資料と補助教材を2段階で用意する。");
+      summary.push("");
+      summary.push("※本レポートはExcel内コメントの機械要約です。最終版は人手で確認してください。");
+
+      return summary.join("\n");
+    }
+
+    fileInput.addEventListener("change", async (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      try {
+        const buffer = await file.arrayBuffer();
+        const workbook = XLSX.read(buffer, { type: "array" });
+        const firstSheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[firstSheetName];
+        rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+
+        if (!rows.length) {
+          setStatus("データ行が見つかりません。ヘッダー付きのExcelを指定してください。", "warn");
+          return;
+        }
+
+        headers = Object.keys(rows[0]);
+        fillSelectOptions(commentColumn, headers, false);
+        fillSelectOptions(scoreColumn, headers, true);
+        autoSelectColumns();
+
+        generateBtn.disabled = false;
+        setStatus(`読み込み完了: ${file.name}（${rows.length}行）`);
+      } catch (error) {
+        setStatus(`読み込みに失敗しました: ${error.message}`, "warn");
+      }
+    });
+
+    generateBtn.addEventListener("click", () => {
+      const commentKey = commentColumn.value;
+      const scoreKey = scoreColumn.value;
+
+      if (!commentKey) {
+        setStatus("コメント列を選択してください。", "warn");
+        return;
+      }
+
+      const comments = rows
+        .map((r) => String(r[commentKey] || "").trim())
+        .filter(Boolean);
+
+      if (!comments.length) {
+        setStatus("コメント列に有効なデータがありません。", "warn");
+        return;
+      }
+
+      const scores = scoreKey
+        ? rows.map((r) => r[scoreKey])
+        : [];
+
+      const report = buildReport(comments, scores);
+      reportOutput.textContent = report;
+      copyBtn.disabled = false;
+      setStatus("報告書を生成しました。必要に応じて編集してご利用ください。");
+    });
+
+    copyBtn.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(reportOutput.textContent);
+        setStatus("報告書をクリップボードにコピーしました。");
+      } catch (error) {
+        setStatus("コピーに失敗しました。手動で選択してコピーしてください。", "warn");
       }
     });
   </script>
