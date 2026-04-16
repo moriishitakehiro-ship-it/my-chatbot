@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>自律をうながすチャットボット</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 700px;
+      margin: 40px auto;
+      padding: 0 16px;
+      background-color: #f7f7f7;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    #chat {
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      padding: 16px;
+      height: 450px;
+      overflow-y: auto;
+      margin-bottom: 12px;
+      background-color: #ffffff;
+    }
+
+    .msg {
+      display: flex;
+      margin: 10px 0;
+    }
+
+    .msg.user {
+      justify-content: flex-end;
+    }
+
+    .msg.bot {
+      justify-content: flex-start;
+    }
+
+    .bubble {
+      max-width: 75%;
+      padding: 12px 16px;
+      border-radius: 18px;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+
+    .user .bubble {
+      background-color: #d9f2ff;
+      color: #000;
+      border-bottom-right-radius: 6px;
+    }
+
+    .bot .bubble {
+      background-color: #eeeeee;
+      color: #333;
+      border-bottom-left-radius: 6px;
+    }
+
+    .thinking {
+      margin: 10px 0;
+      color: #666;
+      font-size: 14px;
+      text-align: left;
+      padding-left: 4px;
+    }
+
+    #row {
+      display: flex;
+      gap: 8px;
+    }
+
+    input {
+      flex: 1;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 12px 16px;
+      border: none;
+      border-radius: 8px;
+      background-color: #333;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+  <h1>自律をうながすチャットボット</h1>
+
+  <div id="chat"></div>
+
+  <div id="row">
+    <input id="input" type="text" placeholder="何か聞いてください" />
+    <button id="send">送信</button>
+  </div>
+
+  <script>
+    const chat = document.getElementById("chat");
+    const input = document.getElementById("input");
+    const send = document.getElementById("send");
+
+    function addBubbleMessage(text, className) {
+      const wrapper = document.createElement("div");
+      wrapper.className = `msg ${className}`;
+
+      const bubble = document.createElement("div");
+      bubble.className = "bubble";
+      bubble.textContent = text;
+
+      wrapper.appendChild(bubble);
+      chat.appendChild(wrapper);
+      chat.scrollTop = chat.scrollHeight;
+
+      return bubble;
+    }
+
+    function addThinkingMessage(text) {
+      const div = document.createElement("div");
+      div.className = "thinking";
+      div.textContent = text;
+
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+
+      return div;
+    }
+
+    async function handleSend() {
+      const text = input.value.trim();
+      if (!text) return;
+
+      // ユーザーの質問は吹き出しで表示
+      addBubbleMessage(text, "user");
+      input.value = "";
+
+      // 考え中メッセージは吹き出しなし
+      const thinking = addThinkingMessage("考え中…");
+
+      const messages = [
+        "考え中…",
+        "あなたの為を思って考え中…",
+        "君にとってのベストを探して考え中…"
+      ];
+
+      let index = 0;
+      const interval = setInterval(() => {
+        index = (index + 1) % messages.length;
+        thinking.textContent = messages[index];
+      }, 1500);
+
+      // 5〜8秒待つ
+      const delay = 5000 + Math.floor(Math.random() * 3000);
+      await new Promise(resolve => setTimeout(resolve, delay));
+
+      // 切り替え停止
+      clearInterval(interval);
+
+      // 考え中表示を消す
+      thinking.remove();
+
+      // 最終回答だけ吹き出しで表示
+      addBubbleMessage("自分で考えて！", "bot");
+    }
+
+    send.addEventListener("click", handleSend);
+
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        handleSend();
+      }
+    });
+  </script>
+</body>
+</html>
